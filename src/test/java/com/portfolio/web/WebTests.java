@@ -59,6 +59,23 @@ public class WebTests {
         });
     }
 
+    private static int retryCounter = 0;
+
+    @Test(groups = "web", retryAnalyzer = com.portfolio.web.listeners.RetryAnalyzer.class)
+    @Story("Control de Flakiness")
+    @Severity(SeverityLevel.MINOR)
+    @Owner("Walther Portuguez")
+    @Description("Demostración de resiliencia: Falla deliberadamente en el primer intento y se recupera en el reintento simulando inestabilidad de red.")
+    public void testFlakyRetryMechanism() {
+        retryCounter++;
+        Allure.step("Ejecución número: " + retryCounter, () -> {
+            if (retryCounter == 1) {
+                Assert.fail("Simulación de fallo intermitente de red en el primer intento.");
+            }
+            Assert.assertTrue(true, "El reintento fue exitoso.");
+        });
+    }
+
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
         if (driver != null) {

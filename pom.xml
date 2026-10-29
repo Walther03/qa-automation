@@ -18,7 +18,10 @@
         <allure.version>2.29.0</allure.version>
         <jackson.version>2.17.2</jackson.version>
         <aspectj.version>1.9.22.1</aspectj.version>
+        
+        <!-- Propiedades por defecto sobreescribibles desde CLI/Workflow -->
         <suiteXmlFile>src/test/resources/testng-api.xml</suiteXmlFile>
+        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
     </properties>
 
     <dependencies>
@@ -73,14 +76,8 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
-                    <properties>
-                        <property>
-                            <name>listener</name>
-                            <value>io.qameta.allure.testng.AllureTestNg</value>
-                        </property>
-                    </properties>
                     <systemPropertyVariables>
-                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                        <allure.results.directory>${allure.results.directory}</allure.results.directory>
                     </systemPropertyVariables>
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"

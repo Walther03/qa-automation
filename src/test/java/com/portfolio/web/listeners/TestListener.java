@@ -20,6 +20,15 @@ public class TestListener implements ITestListener {
     }
 
     @Override
+    public void onStart(ITestContext context) {
+        Allure.addAttachment("Environment Info", "text/plain", 
+            "Environment: " + System.getProperty("env", "qa") + "\n" +
+            "Base URL Web: " + com.portfolio.config.ConfigManager.getProperty("web.baseUrl") + "\n" +
+            "Base URL API: " + com.portfolio.config.ConfigManager.getProperty("api.baseUrl")
+        );
+    }
+    
+    @Override
     public void onTestSuccess(ITestResult result) {
         attachArtifacts(result);
     }

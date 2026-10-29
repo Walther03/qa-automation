@@ -43,7 +43,7 @@ jobs:
 
       - name: Ejecutar Pruebas con Maven
         run: |
-          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }}
+          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Denv=qa
         continue-on-error: true
 
       - name: Instalar Allure CLI
@@ -55,15 +55,17 @@ jobs:
           sudo mv allure-2.29.0 /opt/allure
           sudo ln -s /opt/allure/bin/allure /usr/bin/allure
 
-      - name: Generar Reporte HTML de Allure
+      - name: Generar Reporte HTML Autónomo (--single-file)
         if: always()
         run: |
+          mkdir -p target/allure-results
           allure generate target/allure-results --single-file --clean -o allure-report
 
-      - name: Desplegar Reporte Allure en GitHub Pages
+      - name: Desplegar en GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-report
+          keep_files: false

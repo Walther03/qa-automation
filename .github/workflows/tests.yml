@@ -47,9 +47,13 @@ jobs:
         continue-on-error: true
 
       - name: Instalar Allure CLI
-        uses: allure-framework/setup-allure@v1
-        with:
-          allure-version: 2.29.0
+        if: always()
+        run: |
+          sudo apt-get update && sudo apt-get install -y wget
+          wget https://github.com/allure-framework/allure2/releases/download/2.29.0/allure-2.29.0.tgz
+          tar -zxvf allure-2.29.0.tgz
+          sudo mv allure-2.29.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
 
       - name: Generar Reporte HTML de Allure
         if: always()

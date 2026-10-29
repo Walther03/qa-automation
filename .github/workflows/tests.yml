@@ -37,33 +37,27 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.suite }}" = "web" ]; then
             echo "suite_file=src/test/resources/testng-web.xml" >> $GITHUB_OUTPUT
+            echo "group=web" >> $GITHUB_OUTPUT
           else
             echo "suite_file=src/test/resources/testng-api.xml" >> $GITHUB_OUTPUT
+            echo "group=api" >> $GITHUB_OUTPUT
           fi
 
       - name: Ejecutar Pruebas con Maven
         run: |
-          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }}
+          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Dgroups=${{ steps.select-suite.outputs.group }} -Denv=qa
         continue-on-error: true
 
-      - name: Validar Resultados Generados
+      - name: Validar Generación de Resultados
         if: always()
         run: |
-          echo "=== Contenido de target/allure-results ==="
+          echo "=== Archivos en target/allure-results ==="
           ls -la target/allure-results || echo "Directorio no encontrado"
 
-      - name: Instalar Allure CLI
+      - name: Instalar Allure CLI y Generar Reporte Single-File
         if: always()
         run: |
-          sudo apt-get update && sudo apt-get install -y wget
-          wget https://github.com/allure-framework/allure2/releases/download/2.29.0/allure-2.29.0.tgz
-          tar -zxvf allure-2.29.0.tgz
-          sudo mv allure-2.29.0 /opt/allure
-          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
-
-      - name: Generar Reporte HTML Autónomo (--single-file)
-        if: always()
-        run: |
+          npm install -g allure-commandline
           allure generate target/allure-results --single-file --clean -o allure-report
           touch allure-report/.nojekyll
 

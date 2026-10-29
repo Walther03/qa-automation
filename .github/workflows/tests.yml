@@ -37,22 +37,20 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.suite }}" = "web" ]; then
             echo "suite_file=src/test/resources/testng-web.xml" >> $GITHUB_OUTPUT
-            echo "group=web" >> $GITHUB_OUTPUT
           else
             echo "suite_file=src/test/resources/testng-api.xml" >> $GITHUB_OUTPUT
-            echo "group=api" >> $GITHUB_OUTPUT
           fi
 
       - name: Ejecutar Pruebas con Maven
         run: |
-          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Dgroups=${{ steps.select-suite.outputs.group }} -Denv=qa
+          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Denv=qa
         continue-on-error: true
 
-      - name: Validar Generación de Resultados
+      - name: Validar Generación de Resultados Allure
         if: always()
         run: |
-          echo "=== Archivos en target/allure-results ==="
-          ls -la target/allure-results || echo "Directorio no encontrado"
+          echo "=== Archivos generados en target/allure-results ==="
+          ls -la target/allure-results || echo "Directorio vacio o no encontrado"
 
       - name: Instalar Allure CLI y Generar Reporte Single-File
         if: always()

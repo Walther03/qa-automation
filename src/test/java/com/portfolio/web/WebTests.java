@@ -1,5 +1,6 @@
 package com.portfolio.web;
 
+import com.portfolio.web.listeners.TestListener;
 import com.portfolio.web.pages.LoginPage;
 import io.qameta.allure.*;
 import org.openqa.selenium.WebDriver;
@@ -8,10 +9,12 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Epic("Autenticación Web")
 @Feature("Login de Usuarios en SauceDemo")
+@Listeners({TestListener.class})
 public class WebTests {
 
     public WebDriver driver;
@@ -47,7 +50,7 @@ public class WebTests {
     @Story("Login Usuario Bloqueado")
     @Severity(SeverityLevel.CRITICAL)
     @Owner("Walther Portuguez")
-    @Description("Verificar que el sistema bloquee el acceso y muestre el mensaje de error correspondiente a usuarios bloqueados.")
+    @Description("Verificar que el sistema bloquee el acceso y muestre el mensaje de error correspondiente.")
     public void testLockedOutUser() {
         loginPage.navigateTo("https://www.saucedemo.com/");
         loginPage.login("locked_out_user", "secret_sauce");
@@ -56,23 +59,6 @@ public class WebTests {
             String errorText = loginPage.getErrorMessage();
             Assert.assertTrue(errorText.contains("Sorry, this user has been locked out."), 
                     "El mensaje de error no coincide.");
-        });
-    }
-
-    private static int retryCounter = 0;
-
-    @Test(groups = "web", retryAnalyzer = com.portfolio.web.listeners.RetryAnalyzer.class)
-    @Story("Control de Flakiness")
-    @Severity(SeverityLevel.MINOR)
-    @Owner("Walther Portuguez")
-    @Description("Demostración de resiliencia: Falla deliberadamente en el primer intento y se recupera en el reintento simulando inestabilidad de red.")
-    public void testFlakyRetryMechanism() {
-        retryCounter++;
-        Allure.step("Ejecución número: " + retryCounter, () -> {
-            if (retryCounter == 1) {
-                Assert.fail("Simulación de fallo intermitente de red en el primer intento.");
-            }
-            Assert.assertTrue(true, "El reintento fue exitoso.");
         });
     }
 

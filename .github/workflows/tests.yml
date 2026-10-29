@@ -43,8 +43,17 @@ jobs:
 
       - name: Ejecutar Pruebas con Maven
         run: |
-          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Denv=qa
+          mvn clean test \
+            -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} \
+            -Denv=qa \
+            -Dallure.results.directory=${{ github.workspace }}/target/allure-results
         continue-on-error: true
+
+      - name: Validar Generación de Resultados Allure
+        if: always()
+        run: |
+          echo "=== Verificando archivos en target/allure-results ==="
+          ls -la ${{ github.workspace }}/target/allure-results || echo "Directorio no encontrado"
 
       - name: Instalar Allure CLI
         if: always()
@@ -58,8 +67,8 @@ jobs:
       - name: Generar Reporte HTML Autónomo (--single-file)
         if: always()
         run: |
-          mkdir -p target/allure-results
-          allure generate target/allure-results --single-file --clean -o allure-report
+          allure generate ${{ github.workspace }}/target/allure-results --single-file --clean -o allure-report
+          touch allure-report/.nojekyll
 
       - name: Desplegar en GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

@@ -16,6 +16,7 @@
         <selenium.version>4.25.0</selenium.version>
         <restassured.version>5.5.0</restassured.version>
         <allure.version>2.29.0</allure.version>
+        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
         <suiteXmlFile>src/test/resources/testng-api.xml</suiteXmlFile>
     </properties>
 
@@ -63,6 +64,9 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
+                    <systemPropertyVariables>
+                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                    </systemPropertyVariables>
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.22.1/aspectjweaver-1.9.22.1.jar"
                     </argLine>

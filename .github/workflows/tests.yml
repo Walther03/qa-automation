@@ -1,0 +1,63 @@
+name: Automated Test Execution
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Suite de pruebas a ejecutar (api o web)'
+        required: true
+        default: 'api'
+        type: choice
+        options:
+          - api
+          - web
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Determinar Suite de TestNG
+        id: select-suite
+        run: |
+          if [ "${{ github.event.inputs.suite }}" = "web" ]; then
+            echo "suite_file=src/test/resources/testng-web.xml" >> $GITHUB_OUTPUT
+          else
+            echo "suite_file=src/test/resources/testng-api.xml" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Ejecutar Pruebas con Maven
+        run: |
+          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }}
+        continue-on-error: true
+
+      - name: Generar Reporte Allure
+        uses: simple-elf/allure-report-action@v1.7
+        if: always()
+        with:
+          allure_results: target/allure-results
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Desplegar Reporte Allure en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history

@@ -17,7 +17,6 @@
         <restassured.version>5.5.0</restassured.version>
         <allure.version>2.29.0</allure.version>
         <jackson.version>2.17.2</jackson.version>
-        <aspectj.version>1.9.22.1</aspectj.version>
         <suiteXmlFile>src/test/resources/testng-api.xml</suiteXmlFile>
     </properties>
 
@@ -82,17 +81,7 @@
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
-                    <argLine>
-                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
-                    </argLine>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.aspectj</groupId>
-                        <artifactId>aspectjweaver</artifactId>
-                        <version>${aspectj.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

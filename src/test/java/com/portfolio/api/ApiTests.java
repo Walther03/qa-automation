@@ -1,52 +1,59 @@
 package com.portfolio.api;
 
+import com.portfolio.api.model.PostModel;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
-@Feature("API Suite - JSONPlaceholder Services")
+@Feature("API Suite - REST Services (DTO/POJO)")
 public class ApiTests {
+
+    @BeforeClass(alwaysRun = true)
+    public void setup() {
+        RestAssured.baseURI = "https://jsonplaceholder.typicode.com";
+    }
 
     @Test(groups = "api")
     @Story("Consulta de Publicaciones")
-    @Description("Validar respuesta exitosa (HTTP 200) al obtener el post ID 1")
-    public void testGetPost() {
-        RestAssured.baseURI = "https://jsonplaceholder.typicode.com";
-
-        given()
+    @Description("Deserializar respuesta JSON directamente a un objeto Java (POJO)")
+    public void testGetPostWithPojo() {
+        PostModel responsePost = given()
             .when()
                 .get("/posts/1")
             .then()
                 .statusCode(200)
-                .body("id", equalTo(1))
-                .body("title", notNullValue());
+                .contentType(ContentType.JSON)
+                .extract()
+                .as(PostModel.class);
+
+        Assert.assertEquals(responsePost.getId(), Integer.valueOf(1), "El ID devuelto no coincide.");
+        Assert.assertNotNull(responsePost.getTitle(), "El título de la publicación no debe ser nulo.");
     }
 
     @Test(groups = "api")
     @Story("Creación de Publicaciones")
-    @Description("Validar creación simulada (HTTP 201) de un nuevo recurso")
-    public void testCreatePost() {
-        RestAssured.baseURI = "https://jsonplaceholder.typicode.com";
+    @Description("Serializar un objeto POJO a JSON en una petición POST")
+    public void testCreatePostWithPojo() {
+        PostModel newPost = new PostModel(1, "QE Portfolio Test", "Automated Execution with RestAssured and POJOs");
 
-        String requestBody = "{\n" +
-                "  \"title\": \"QE Portfolio Test\",\n" +
-                "  \"body\": \"Automated API Execution\",\n" +
-                "  \"userId\": 1\n" +
-                "}";
-
-        given()
-            .header("Content-Type", "application/json; charset=UTF-8")
-            .body(requestBody)
+        PostModel createdPost = given()
+            .contentType(ContentType.JSON)
+            .body(newPost)
             .when()
                 .post("/posts")
             .then()
                 .statusCode(201)
-                .body("title", equalTo("QE Portfolio Test"));
+                .extract()
+                .as(PostModel.class);
+
+        Assert.assertEquals(createdPost.getTitle(), newPost.getTitle(), "El título de la respuesta no coincide con el enviado.");
+        Assert.assertNotNull(createdPost.getId(), "El recurso creado debe retornar un ID generado.");
     }
 }

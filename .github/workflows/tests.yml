@@ -61,3 +61,4 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-report
           keep_files: false
+

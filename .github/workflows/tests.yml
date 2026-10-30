@@ -42,11 +42,18 @@ jobs:
           fi
 
       - name: Ejecutar Pruebas con Maven
+        id: tests
         run: |
-          mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Denv=qa
+          mvn -B clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Denv=qa
         continue-on-error: true
 
-      - name: Generar Reporte Allure Single-File
+      - name: Datos de entorno para el reporte
+        if: always()
+        run: |
+          mkdir -p target/allure-results
+          printf "Entorno=QA\nSuite=${{ github.event.inputs.suite }}\nNavegador=Chrome headless\nAutor=Walther Portuguez\n" > target/allure-results/environment.properties
+
+      - name: Instalar Allure CLI y Generar Reporte Single-File
         if: always()
         run: |
           npm install -g allure-commandline
@@ -61,3 +68,7 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-report
           keep_files: false
+
+      - name: Marcar el job en rojo si fallaron las pruebas
+        if: steps.tests.outcome == 'failure'
+        run: exit 1

@@ -4,8 +4,11 @@ import io.qameta.allure.Attachment;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.logging.LogEntry;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+
+import java.util.stream.Collectors;
 
 public class TestListener implements ITestListener {
 
@@ -16,18 +19,11 @@ public class TestListener implements ITestListener {
 
     @Attachment(value = "Logs de consola del navegador", type = "text/plain")
     public String saveConsoleLogs(WebDriver driver) {
-        return String.join("\n", driver.manage().logs().get("browser").getAll().toString());
+        return driver.manage().logs().get("browser").getAll().stream()
+                .map(LogEntry::toString)
+                .collect(Collectors.joining("\n"));
     }
 
-    @Override
-    public void onStart(ITestContext context) {
-        Allure.addAttachment("Environment Info", "text/plain", 
-            "Environment: " + System.getProperty("env", "qa") + "\n" +
-            "Base URL Web: " + com.portfolio.config.ConfigManager.getProperty("web.baseUrl") + "\n" +
-            "Base URL API: " + com.portfolio.config.ConfigManager.getProperty("api.baseUrl")
-        );
-    }
-    
     @Override
     public void onTestSuccess(ITestResult result) {
         attachArtifacts(result);
@@ -40,13 +36,24 @@ public class TestListener implements ITestListener {
 
     private void attachArtifacts(ITestResult result) {
         Object testClass = result.getInstance();
+        WebDriver driver;
         try {
-            WebDriver driver = (WebDriver) testClass.getClass().getField("driver").get(testClass);
-            if (driver != null) {
-                saveScreenshot(driver);
-            }
+            driver = (WebDriver) testClass.getClass().getField("driver").get(testClass);
+        } catch (Exception e) {
+            System.out.println("No se pudo acceder al driver: " + e.getMessage());
+            return;
+        }
+        if (driver == null) return;
+
+        try {
+            saveScreenshot(driver);
         } catch (Exception e) {
             System.out.println("No se pudo adjuntar captura de pantalla: " + e.getMessage());
+        }
+        try {
+            saveConsoleLogs(driver);
+        } catch (Exception e) {
+            System.out.println("No se pudo adjuntar logs de consola: " + e.getMessage());
         }
     }
 }

@@ -46,12 +46,6 @@ jobs:
           mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Denv=qa
         continue-on-error: true
 
-      - name: Validar Generación de Resultados Allure
-        if: always()
-        run: |
-          echo "=== Archivos generados en target/allure-results ==="
-          ls -la target/allure-results || echo "Directorio vacio o no encontrado"
-
       - name: Instalar Allure CLI y Generar Reporte Single-File
         if: always()
         run: |

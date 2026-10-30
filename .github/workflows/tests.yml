@@ -46,7 +46,7 @@ jobs:
           mvn clean test -DsuiteXmlFile=${{ steps.select-suite.outputs.suite_file }} -Denv=qa
         continue-on-error: true
 
-      - name: Instalar Allure CLI y Generar Reporte Single-File
+      - name: Generar Reporte Allure Single-File
         if: always()
         run: |
           npm install -g allure-commandline
@@ -61,4 +61,3 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-report
           keep_files: false
-

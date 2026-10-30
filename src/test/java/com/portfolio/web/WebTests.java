@@ -1,5 +1,6 @@
 package com.portfolio.web;
 
+import com.portfolio.web.listeners.RetryAnalyzer;
 import com.portfolio.web.listeners.TestListener;
 import com.portfolio.web.pages.LoginPage;
 import io.qameta.allure.*;
@@ -31,7 +32,7 @@ public class WebTests {
         loginPage = new LoginPage(driver);
     }
 
-    @Test(groups = "web")
+    @Test(groups = "web", retryAnalyzer = RetryAnalyzer.class)
     @Story("Login Exitoso")
     @Severity(SeverityLevel.BLOCKER)
     @Owner("Walther Portuguez")
@@ -41,12 +42,12 @@ public class WebTests {
         loginPage.login("standard_user", "secret_sauce");
 
         Allure.step("Validar URL final de redirección al inventario", () -> {
-            Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"), 
+            Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"),
                     "El login no redireccionó al inventario.");
         });
     }
 
-    @Test(groups = "web")
+    @Test(groups = "web", retryAnalyzer = RetryAnalyzer.class)
     @Story("Login Usuario Bloqueado")
     @Severity(SeverityLevel.CRITICAL)
     @Owner("Walther Portuguez")
@@ -57,7 +58,7 @@ public class WebTests {
 
         Allure.step("Validar mensaje de error en pantalla", () -> {
             String errorText = loginPage.getErrorMessage();
-            Assert.assertTrue(errorText.contains("Sorry, this user has been locked out."), 
+            Assert.assertTrue(errorText.contains("Sorry, this user has been locked out."),
                     "El mensaje de error no coincide.");
         });
     }
